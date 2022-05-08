@@ -1,15 +1,53 @@
 {
 	"pages": [{
-		"path": "pages/index/index",
+		"path": "pages/home/home",
 		"style": {
-			"navigationBarTitleText": "uni-app"
+			"navigationBarTitleText": "智慧乡村",
+			"enablePullDownRefresh": false
 		}
+
+	}, {
+		"path": "pages/chat/chat",
+		"style": {
+			"navigationBarTitleText": "智慧乡村",
+			"enablePullDownRefresh": false
+		}
+
+	}, {
+		"path": "pages/my/my",
+		"style": {
+			"navigationBarTitleText": "智慧乡村",
+			"enablePullDownRefresh": false
+		}
+
 	}],
+	"tabBar": {
+		"selectedColor": "#1E90FF",
+		"list": [{
+				"pagePath": "pages/home/home",
+				"text": "首页",
+				"iconPath": "static/tab_icons/home.png",
+				"selectedIconPath": "static/tab_icons/home-active.png"
+			},
+			{
+				"pagePath": "pages/chat/chat",
+				"text": "聊天",
+				"iconPath": "static/tab_icons/chat.png",
+				"selectedIconPath": "static/tab_icons/chat-active.png"
+			},
+			{
+				"pagePath": "pages/my/my",
+				"text": "我的",
+				"iconPath": "static/tab_icons/my.png",
+				"selectedIconPath": "static/tab_icons/my-active.png"
+			}
+		]
+	},
 	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8",
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "智慧乡村",
+		"navigationBarBackgroundColor": "#1E90FF",
+		"backgroundColor": "#FFFFFF",
 		"app-plus": {
 			"background": "#efeff4"
 		}
