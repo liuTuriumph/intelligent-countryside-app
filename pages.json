@@ -9,8 +9,9 @@
 	}, {
 		"path": "pages/chat/chat",
 		"style": {
-			"navigationBarTitleText": "智慧乡村",
-			"enablePullDownRefresh": false
+			"enablePullDownRefresh":true,
+			"navigationStyle":"custom",
+			"navigationBarTitleText": "智慧乡村"
 		}
 
 	}, {
@@ -20,6 +21,20 @@
 			"enablePullDownRefresh": false
 		}
 
+	}],
+	"subPackages":[{
+		"root":"subpkg",
+		"pages":[{
+                    "path" : "sendPosts/sendPosts",
+                    "style" :                                                                                    
+                {
+					"navigationStyle":"custom",
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+            ]
 	}],
 	"tabBar": {
 		"selectedColor": "#1E90FF",

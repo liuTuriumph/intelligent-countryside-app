@@ -1,15 +1,20 @@
-
 // #ifndef VUE3
 import Vue from 'vue'
 import App from './App'
 //将请求promise化
-import { $http } from '@escook/request-miniprogram'
+import {
+	$http
+} from '@escook/request-miniprogram'
 //导入store的实例对象
 import store from '@/store/store.js'
+//导入colorUI
+import cuCustom from './colorui/components/cu-custom.vue'
+Vue.component('cu-custom', cuCustom)
 
 uni.$http = $http
 //设置请求的根路径
-$http.baseUrl = 'http://175.178.224.177:8080'
+$http.baseUrl = 'http://175.178.224.177:80'
+//$http.baseUrl = 'http://localhost:80'
 
 Vue.config.productionTip = false
 
@@ -25,18 +30,21 @@ uni.$showMsg = function(title = '数据加载失败！', duration = 1500) {
 }
 
 const app = new Vue({
-    ...App
+	...App,
+	store,
 })
 app.$mount()
 // #endif
 
 // #ifdef VUE3
-import { createSSRApp } from 'vue'
+import {
+	createSSRApp
+} from 'vue'
 import App from './App.vue'
 export function createApp() {
-  const app = createSSRApp(App)
-  return {
-    app
-  }
+	const app = createSSRApp(App)
+	return {
+		app
+	}
 }
 // #endif
