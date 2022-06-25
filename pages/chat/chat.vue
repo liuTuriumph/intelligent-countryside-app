@@ -62,7 +62,7 @@
 						<button class="share-btn" open-type="share" :data-index="i1" :data-shareCount="item.countList.shareCount" :data-id="item.id">
 							<text class="cuIcon-forwardfill margin-lr-xs"></text> 
 							<block v-if="item.countList.shareCount == 0">
-								转发							
+								转发
 							</block>
 							<block v-else-if="item.countList.replyCount > 100">
 								100+							
@@ -71,10 +71,12 @@
 								{{item.countList.shareCount}}
 							</block>
 						</button>
-						<button class="share-btn" >
-							<text class="cuIcon-appreciatefill margin-lr-xs"></text> 
+						<button class="share-btn">
+							<text class="cuIcon-appreciatefill margin-lr-xs" style="color: red;" v-if="item.prizeFlag === true" @tap="prizePost2()"></text> 
+							<text class="cuIcon-appreciatefill margin-lr-xs" v-else @tap="prizePost(item)"></text> 
+							
 							<block v-if="item.countList.prizeCount == 0">
-								点赞							
+								点赞
 							</block>
 							<block v-else-if="item.countList.replyCount > 100">
 								100+							
@@ -285,10 +287,14 @@
 				bottom:0,
 				//动态的帖子数量
 				replyCount:0,
+				//验证是否授权功能用来判断是否是跳转发帖的标识
+				sendPostFlag: false,
+				//验证是否授权功能用来判断是否是点赞帖子的标识
+				prizePostFlag: false,
 			};
 		},
 		computed: {
-			...mapState('m_user', ['userinfo', 'openid']),
+			...mapState('m_user', ['userinfo', 'openid','userid']),
 		},
 		onShow() {
 			this.is_login = uni.getStorageSync('is_login')
@@ -329,7 +335,7 @@
 			this.scrollTop = e.scrollTop
 		},
 		methods: {
-			...mapMutations('m_user', ['updateUserInfo', 'updateUserLogin', 'updateUserOpenId']),
+			...mapMutations('m_user', ['updateUserInfo', 'updateUserLogin', 'updateUserOpenId',"updateUserId"]),
 			tabSelect(e) {
 				this.TabCur = e.currentTarget.dataset.id;
 				this.scrollLeft = (e.currentTarget.dataset.id - 1) * 60
@@ -339,6 +345,7 @@
 				//如果未登录就跳出获取获取用户权限提示栏
 				if (this.is_login !== 'true') {
 					this.modalName = e.currentTarget.dataset.target
+					this.sendPostFlag = true
 					return
 				}
 				//跳转到发布动态页面
@@ -367,17 +374,23 @@
 								this.getOpenId(res.code)
 							}
 						})
-						if (this.replyFlag !== true) {
+						if (this.sendPostFlag == true) {
 							//跳转到发布动态页面
 							uni.navigateTo({
 								url: '../../subpkg/sendPosts/sendPosts'
 							})
-						} else {
+						} else if(this.replyFlag == true){
 							this.show = true
+						} else if(this.prizePostFlag == true){
+							setTimeout(()=>{
+								this.getPrizeList()
+								uni.$showMsg("授权成功")
+							},1000)
 						}
 					},
 					fail: (e) => {
 						this.replyFlag = false
+						this.sendPostFlag = false
 						if (e.errMsg === 'getUserProfile:fail auth deny') return uni.$showMsg('您取消了登录授权')
 
 					}
@@ -385,11 +398,19 @@
 			},
 			//发送请求到后端获取openid,并将数据存储到本地
 			async getOpenId(code) {
+				//获取用户openid
 				const {
 					data: res
 				} = await uni.$http.get('/kivze/user/getOpenId/' + code)
 				this.updateUserOpenId(res.msg)
+				//获取用户id
+				this.getUserId(res.msg)
 				return
+			},
+			//获取用户id
+			async getUserId(openid){
+				const {data:res} = await uni.$http.get('/kivze/user/getUserId/'+openid)	
+				this.updateUserId(res.data)			
 			},
 			//发送get请求获取所有的动态信息
 			async getPostsInfo(cb) {
@@ -402,7 +423,7 @@
 				//发送请求获取数据
 				const {
 					data: res
-				} = await uni.$http.get('/kivze/user/getNewPostsInfo', this.queryObj)
+				} = await uni.$http.get('/kivze/chat/getNewPostsInfo', this.queryObj)
 				if (res.flag !== true) return uni.$showMsg()			
 				//为数据赋值
 				this.postsInfo = [...this.postsInfo, ...res.data.postsInfoList]
@@ -423,7 +444,8 @@
 					const countList = await this.getPostsFunctionCount(item.id)
 					this.$set(item,"countList",countList)
 				})
-				
+				//判断帖子是否已经被当前用户点赞
+				setTimeout(()=>{this.getPrizeList()},500)						
 				//如果是下拉刷新事件的请求，则执行传入的方法
 				cb && cb()
 				//关闭节流阀
@@ -431,9 +453,22 @@
 				//关闭提示
 				uni.hideLoading()
 			},
+			//获取帖子的点赞列表
+			async getPrizeList(){
+				console.log(this.userid)
+				this.postsInfo.forEach(async(item,index) => {
+					if(item.countList.prizeUser == null) return;
+					item.countList.prizeUser.forEach(async (item2,index2)=>{						
+						if(item2 == this.userid){
+							this.$set(item,"prizeFlag",true);
+							return
+						}
+					})				
+				})
+			},
 			//根据传入的数据更新帖子的回复数
-			async updateReplyCount(postId,replyCount){
-				const {data:res} = await uni.$http.put("/kivze/user/updateReplyCount/"+postId+"/"+replyCount)
+			async updateReplyCount(postId){
+				const {data:res} = await uni.$http.put("/kivze/chat/addReplyCount/"+postId)
 				if (res.flag === false) {
 					uni.$showMsg('操作错误，请重试。')
 					return
@@ -441,7 +476,7 @@
 			},
 			//根据id获取帖子的点赞、转发和评论数
 			async getPostsFunctionCount(postId){
-				const { data:res } = await uni.$http.get("/kivze/user/getPostsFunctionCount/"+postId)
+				const { data:res } = await uni.$http.get("/kivze/chat/getPostsFunctionCount/"+postId)
 				if (res.flag === false) {
 					uni.$showMsg('查询错误，请重试。')
 					return
@@ -484,8 +519,7 @@
 				//查看对应的图片
 				uni.previewImage({
 					urls: imageUrlList
-				})
-				this.updateReplyCount(30,2)
+				})			
 			},
 			//返回顶部
 			scrollToTop() {
@@ -555,7 +589,7 @@
 					toNickName: this.toNickName,
 					time: Date.now()
 				}
-				const res = await uni.$http.post('/kivze/user/addPostsReply', reply)
+				const res = await uni.$http.post('/kivze/chat/addPostsReply', reply)
 				if (res.statusCode !== 200) {
 					uni.$showMsg("回复失败，请重试")
 					return
@@ -587,7 +621,7 @@
 			async getReply(postId) {
 				const {
 					data: res
-				} = await uni.$http.get('/kivze/user/getReply/' + postId)
+				} = await uni.$http.get('/kivze/chat/getReply/' + postId)
 				if (res.flag === false) {
 					uni.$showMsg('查询错误，请重试。')
 					return
@@ -596,7 +630,7 @@
 			},
 			//根据父级评论的id查询对应的子级评论
 			async getChildReply(replyId){
-				const{data:res} = await uni.$http.get('/kivze/user/getChildReply/'+replyId)
+				const{data:res} = await uni.$http.get('/kivze/chat/getChildReply/'+replyId)
 				if (res.flag === false) {
 					uni.$showMsg('查询错误，请重试。')
 					return
@@ -642,8 +676,28 @@
 					path:'subpkg/postsDetail/postsDetail?id='+id,
 				}
 				return shareObj
+			},
+			//点赞帖子的功能
+			prizePost(item){
+				//判断用户是否登录
+				if (this.is_login !== 'true') {
+					this.modalName = 'DialogModal1'
+					this.prizePostFlag = true; 
+					return
+				}
+				//向后台对应帖子添加点赞用户的id
+				uni.$http.put("/kivze/chat/addPrizeUser/"+item.id+"/"+this.userid)
+				//在用户表中为该用户记录点赞的帖子id	
+				uni.$http.put("/kivze/user/addPrizePost/"+item.id+"/"+this.userid)
+				//帖子的点赞数加1
+				uni.$http.put("/kivze/chat/addPrizeCount/"+item.id)
+				//为当前的postInfo字段添加代表已经点赞的字段prizeFlag,点赞数加1
+				this.$set(item,"prizeFlag",true)
+				item.countList.prizeCount++
+			},
+			prizePost2(){
+				uni.$showMsg("请勿重复点赞")
 			}
-
 		}
 	}
 </script>

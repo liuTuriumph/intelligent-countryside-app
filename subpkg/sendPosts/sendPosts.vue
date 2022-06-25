@@ -175,13 +175,13 @@
 					time: Date.now()
 				}
 				//将动态信息存储到数据库中。
-				const res = await uni.$http.post('/kivze/user/addPostsInfo',query)
+				const res = await uni.$http.post('/kivze/chat/addPostsInfo',query)
 				if(res.data.flag !== true){
 					uni.$showMsg('动态发布失败，请重试。')
 					return
 				}		
 				//插入成功，用获取到的自增长id值创建帖子分享数表
-				const res2 = await uni.$http.post('/kivze/user/addPostsCount',res.data.data)
+				const res2 = await uni.$http.post('/kivze/chat/addPostsCount',res.data.data)
 				if(res.data.flag !== true){
 					uni.$showMsg('动态发布失败，请重试。')
 					return

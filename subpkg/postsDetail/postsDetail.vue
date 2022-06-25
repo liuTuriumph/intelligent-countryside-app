@@ -273,7 +273,7 @@
 			this.onFocus()
 		},
 		methods:{
-			...mapMutations('m_user', ['updateUserInfo', 'updateUserLogin', 'updateUserOpenId']),	
+			...mapMutations('m_user', ['updateUserInfo', 'updateUserLogin', 'updateUserOpenId','updateUserId']),	
 			//发送get请求获取所有的动态信息
 			async getPostsInfo(id) {
 				//提示正在加载
@@ -283,7 +283,7 @@
 				//发送请求获取数据
 				const {
 					data: res
-				} = await uni.$http.get('/kivze/user/getPostsInfoById/'+id)
+				} = await uni.$http.get('/kivze/chat/getPostsInfoById/'+id)
 				if (res.flag !== true) return uni.$showMsg()
 				//为数据赋值
 				this.postsInfo = [...this.postsInfo, res.data]
@@ -310,7 +310,7 @@
 			},
 			//根据传入的数据更新帖子的回复数
 			async updateReplyCount(postId,replyCount){
-				const {data:res} = await uni.$http.put("/kivze/user/updateReplyCount/"+postId+"/"+replyCount)
+				const {data:res} = await uni.$http.put("/kivze/chat/updateReplyCount/"+postId+"/"+replyCount)
 				if (res.flag === false) {
 					uni.$showMsg('操作错误，请重试。')
 					return
@@ -318,7 +318,7 @@
 			},
 			//根据id获取帖子的点赞、转发和评论数
 			async getPostsFunctionCount(postId){
-				const { data:res } = await uni.$http.get("/kivze/user/getPostsFunctionCount/"+postId)
+				const { data:res } = await uni.$http.get("/kivze/chat/getPostsFunctionCount/"+postId)
 				if (res.flag === false) {
 					uni.$showMsg('查询错误，请重试。')
 					return
@@ -364,13 +364,20 @@
 					data: res
 				} = await uni.$http.get('/kivze/user/getOpenId/' + code)
 				this.updateUserOpenId(res.msg)
+				//获取用户id
+				this.getUserId(res.msg)
 				return
+			},
+			//获取用户id
+			async getUserId(openid){
+				const {data:res} = await uni.$http.get('/kivze/user/getUserId/'+openid)	
+				this.updateUserId(res.data)			
 			},
 			//根据动态的id查询该动态对应的回复信息
 			async getReply(postId) {
 				const {
 					data: res
-				} = await uni.$http.get('/kivze/user/getReply/' + postId)
+				} = await uni.$http.get('/kivze/chat/getReply/' + postId)
 				if (res.flag === false) {
 					uni.$showMsg('查询错误，请重试。')
 					return
@@ -379,7 +386,7 @@
 			},
 			//根据父级评论的id查询对应的子级评论
 			async getChildReply(replyId){
-				const{data:res} = await uni.$http.get('/kivze/user/getChildReply/'+replyId)
+				const{data:res} = await uni.$http.get('/kivze/chat/getChildReply/'+replyId)
 				if (res.flag === false) {
 					uni.$showMsg('查询错误，请重试。')
 					return
@@ -492,7 +499,7 @@
 					toNickName: this.toNickName,
 					time: Date.now()
 				}
-				const res = await uni.$http.post('/kivze/user/addPostsReply', reply)
+				const res = await uni.$http.post('/kivze/chat/addPostsReply', reply)
 				if (res.statusCode !== 200) {
 					uni.$showMsg("回复失败，请重试")
 					return

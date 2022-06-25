@@ -10,6 +10,8 @@ export default {
 		is_login: uni.getStorageSync('is_login')||false,
 		//用户的openid
 		openid:JSON.parse(uni.getStorageSync('openid') || null),
+		//用户的userid
+		userid:JSON.parse(uni.getStorageSync('userid') || null),
 
 	}),
 	
@@ -47,6 +49,15 @@ export default {
 		//将用户openid持久化存储到本地
 		saveUserOpenIdToStorage(state){
 			uni.setStorageSync('openid',JSON.stringify(state.openid))
+		},
+		//更新用户userid
+		updateUserId(state,userid){
+			state.userid = userid
+			this.commit('m_user/saveUserIdToStorage')
+		},
+		//将用户userid持久化存储到本地
+		saveUserIdToStorage(state){
+			uni.setStorageSync('userid',JSON.stringify(state.userid))
 		},
 		
 	},
