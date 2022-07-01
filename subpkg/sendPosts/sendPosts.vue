@@ -90,7 +90,7 @@
 			};
 		},
 		computed: {
-			...mapState('m_user', ['userinfo','openid']),
+			...mapState('m_user', ['userinfo','openid','userid']),
 
 		},
 		methods: {
@@ -182,10 +182,16 @@
 				}		
 				//插入成功，用获取到的自增长id值创建帖子分享数表
 				const res2 = await uni.$http.post('/kivze/chat/addPostsCount',res.data.data)
-				if(res.data.flag !== true){
+				if(res2.data.flag !== true){
 					uni.$showMsg('动态发布失败，请重试。')
 					return
-				}	
+				}
+				//发送成功,在用户表中记录该用户发布的帖子id
+				const res3 = await uni.$http.put("/kivze/user/addSendPost/"+res.data.data+"/"+this.userid)
+				if(res3.data.flag !== true){
+					uni.$showMsg('动态发布失败，请重试。')
+					return
+				}
 				//发布成功跳转到聊天首页
 				uni.switchTab({
 					url:"../../pages/chat/chat",

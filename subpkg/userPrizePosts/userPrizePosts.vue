@@ -273,7 +273,7 @@
 			this.is_login = uni.getStorageSync('is_login')
 		},
 		onLoad(options) {
-			this.getPostsInfo(options.id)
+			this.getPostsInfo()
 			const sysInfo = uni.getSystemInfoSync()
 			this.boxHeight = sysInfo.windowHeight / 2 + 100
 			this.onFocus()
@@ -281,7 +281,9 @@
 		methods:{
 			...mapMutations('m_user', ['updateUserInfo', 'updateUserLogin', 'updateUserOpenId','updateUserId']),	
 			//发送get请求获取所有的动态信息
-			async getPostsInfo(id) {
+			async getPostsInfo() {
+				//打开节流阀防止用户频繁请求
+				this.isLoading = true
 				//提示正在加载
 				uni.showLoading({
 					title: '正在加载！'
@@ -289,10 +291,10 @@
 				//发送请求获取数据
 				const {
 					data: res
-				} = await uni.$http.get('/kivze/chat/getPostsInfoById/'+id)
-				if (res.flag !== true) return uni.$showMsg()
+				} = await uni.$http.get('/kivze/chat/getPrizeListById/'+this.userid,this.queryObj)
+				if (res.flag !== true) return uni.$showMsg()			
 				//为数据赋值
-				this.postsInfo = [...this.postsInfo, res.data]
+				this.postsInfo = [...this.postsInfo, ...res.data.postsInfoList]
 				//为数据添加回复数据字段
 				this.postsInfo.forEach(async (item, index) => {
 					const replyList = await this.getReply(item.id)
@@ -302,9 +304,8 @@
 						this.$set(item2, 'childReplyList', childReplyList)
 					})
 					
-					this.$set(item, 'replyList', replyList)
-					
-				})			
+					this.$set(item, 'replyList', replyList)	
+				})
 				this.total = res.data.total
 				//获取帖子的点赞、转发和评论数
 				this.postsInfo.forEach(async(item,index) => {
@@ -312,7 +313,9 @@
 					this.$set(item,"countList",countList)
 				})
 				//判断帖子是否已经被当前用户点赞
-				setTimeout(()=>{this.getPrizeList()},500)
+				setTimeout(()=>{this.getPrizeList()},1000)						
+				//关闭节流阀
+				this.isLoading = false
 				//关闭提示
 				uni.hideLoading()
 			},
@@ -581,19 +584,25 @@
 				this.bottom = 0
 			},
 			//分享转发帖子的功能
-			onShareAppMessage(event){
-				console.log(event)
-				var index = event.target.dataset.index
-				var id = event.target.dataset.id
-				return{
-					title:this.postsInfo[id].content,
-					imageUrl:"/static/shareImage2.jpg",
-					path:'subpkg/postsDetail/postsDetail?id='+index
+			onShareAppMessage(event){			
+				if(event.from == "menu"){
+					var shareObj = {
+						title:'智慧乡村管理小程序',
+						imageUrl:"/static/shareImage2.jpg",
+						path:'pages/home/home',
+					}
+				}else{
+					var index = event.target.dataset.index
+					var id = event.target.dataset.id
+					var shareCount = event.target.dataset.sharecount
+					var shareObj = {
+						title:this.postsInfo[index].content,
+						imageUrl:"/static/shareImage2.jpg",
+						path:'subpkg/postsDetail/postsDetail?id='+id,
+					}
 				}
-			},
-			scroll: function(e) {
-				//console.log(e)
-				this.old.scrollTop1 = e.detail.scrollTop1
+			
+				return shareObj
 			},
 			//点赞帖子的功能
 			prizePost(item){

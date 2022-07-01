@@ -130,7 +130,7 @@
 		<view class="cu-modal" :class="modalName=='DialogModal1'?'show':''">
 			<view class="cu-dialog">
 				<view class="cu-bar bg-white justify-end">
-					<view class="content">Modal标题</view>
+					<view class="content">授权请求</view>
 					<view class="action" @tap="hideModal">
 						<text class="cuIcon-close text-red"></text>
 					</view>
@@ -391,6 +391,7 @@
 					fail: (e) => {
 						this.replyFlag = false
 						this.sendPostFlag = false
+						this.prizePostFlag = false
 						if (e.errMsg === 'getUserProfile:fail auth deny') return uni.$showMsg('您取消了登录授权')
 
 					}
@@ -424,7 +425,7 @@
 				const {
 					data: res
 				} = await uni.$http.get('/kivze/chat/getNewPostsInfo', this.queryObj)
-				if (res.flag !== true) return uni.$showMsg()			
+				if (res.flag !== true) return uni.$showMsg()				
 				//为数据赋值
 				this.postsInfo = [...this.postsInfo, ...res.data.postsInfoList]
 				//为数据添加回复数据字段
@@ -445,7 +446,7 @@
 					this.$set(item,"countList",countList)
 				})
 				//判断帖子是否已经被当前用户点赞
-				setTimeout(()=>{this.getPrizeList()},500)						
+				setTimeout(()=>{this.getPrizeList()},1000)						
 				//如果是下拉刷新事件的请求，则执行传入的方法
 				cb && cb()
 				//关闭节流阀
@@ -666,15 +667,24 @@
 				this.bottom = 0
 			},
 			//分享转发帖子的功能
-			onShareAppMessage(event){
-				var index = event.target.dataset.index
-				var id = event.target.dataset.id
-				var shareCount = event.target.dataset.sharecount
-				var shareObj = {
-					title:this.postsInfo[index].content,
-					imageUrl:"/static/shareImage2.jpg",
-					path:'subpkg/postsDetail/postsDetail?id='+id,
+			onShareAppMessage(event){			
+				if(event.from == "menu"){
+					var shareObj = {
+						title:'智慧乡村管理小程序',
+						imageUrl:"/static/shareImage2.jpg",
+						path:'pages/home/home',
+					}
+				}else{
+					var index = event.target.dataset.index
+					var id = event.target.dataset.id
+					var shareCount = event.target.dataset.sharecount
+					var shareObj = {
+						title:this.postsInfo[index].content,
+						imageUrl:"/static/shareImage2.jpg",
+						path:'subpkg/postsDetail/postsDetail?id='+id,
+					}
 				}
+
 				return shareObj
 			},
 			//点赞帖子的功能
@@ -846,10 +856,11 @@
 		.share-btn{
 			font-size: 28rpx;
 			height: 20rpx;
+			width: 110rpx;
 			background-color: white;
 			color: #AAAAAA;	
 			overflow: visible;
-			padding: 0px 8rpx;		
+			padding: 0px;		
 		}
 		.share-btn text{
 			margin-right: 4rpx;	

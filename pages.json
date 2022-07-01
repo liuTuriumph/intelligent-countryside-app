@@ -18,7 +18,7 @@
 	}, {
 		"path": "pages/my/my",
 		"style": {
-			"navigationBarTitleText": "智慧乡村",
+			"navigationBarTitleText": "",
 			"enablePullDownRefresh": false
 		}
 
@@ -43,6 +43,26 @@
                     "navigationBarTitleText": "",
                     "enablePullDownRefresh": false
 					
+                }
+                
+                }
+                ,{
+                    "path" : "userSendPosts/userSendPosts",
+                    "style" :                                                                                    
+                {
+					"navigationStyle":"custom",
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": false
+                }
+                
+                }
+                ,{
+                    "path" : "userPrizePosts/userPrizePosts",
+                    "style" :                                                                                    
+                {
+					"navigationStyle":"custom",
+                    "navigationBarTitleText": "",
+                    "enablePullDownRefresh": false
                 }
                 
                 }
