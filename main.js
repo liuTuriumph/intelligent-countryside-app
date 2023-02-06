@@ -13,8 +13,8 @@ Vue.component('cu-custom', cuCustom)
 
 uni.$http = $http
 //设置请求的根路径
-$http.baseUrl = 'http://175.178.224.177:80'
-//$http.baseUrl = 'http://localhost:80'
+$http.baseUrl = XXXX
+//$http.baseUrl = XXXX
 
 Vue.config.productionTip = false
 
