@@ -6,7 +6,7 @@ const getcos =function getCos() {
 	    getAuthorization: function (options, callback) {
 	        // 异步获取临时密钥
 	        uni.request({
-	            url:  'http://175.178.224.177:80/kivze/user/getCosSecre',
+	            url:  'https://www.kivze.top/kivze/chat/getCosSecre',
 	            data: {
 	                bucket: options.Bucket,//固定写法
 	                region: options.Region,//固定写法
