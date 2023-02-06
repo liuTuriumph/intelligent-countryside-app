@@ -15,6 +15,10 @@ export default {
 	
 	//方法
 	mutations:{
+		//获取用户信息
+		getUserInfo(state){
+			return state.userinfo
+		},
 		//更新用户信息
 		updateUserInfo(state,userinfo){
 			state.userinfo = userinfo

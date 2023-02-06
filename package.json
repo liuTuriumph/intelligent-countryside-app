@@ -1,5 +1,8 @@
 {
 	"dependencies": {
-		"@escook/request-miniprogram": "^0.2.1"
+		"@escook/request-miniprogram": "^0.2.1",
+		"uview-ui": "^1.8.4",
+		"weui-miniprogram": "^1.2.3"
 	}
+	
 }

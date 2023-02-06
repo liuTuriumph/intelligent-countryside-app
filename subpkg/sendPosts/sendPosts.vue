@@ -19,8 +19,9 @@
 					<!-- 用户头像区域 -->
 					<view class="userInfo-container">
 						<view class="userInfo-body">
-							<view class="cu-avatar round lg" :style="'background-image:url('+userinfo.avatarUrl+');'">
-							</view>
+							
+							<image :src="userinfo.avatarUrl" class="userInfo-body-image" mode="aspectFill"></image>	
+							
 							<view class="userInfo-box">
 								<view class="userInfo-name">{{userinfo.nickName}}</view>
 							</view>
@@ -66,7 +67,8 @@
 
 <script>
 	import {
-		mapState
+		mapState,
+		mapMutations
 	} from 'vuex'
 	import COS from "../../utils/cos-wx-sdk-v5.js"
 	import config from "../../common/config.js"
@@ -84,11 +86,12 @@
 				//可选择的图片数量
 				maxCount: 6,
 				//用户上传的图片的路径数组
-				tempImagesPaths: [],
+				tempImagesPaths: []
 			};
 		},
 		computed: {
-			...mapState('m_user', ['userinfo','openid'])
+			...mapState('m_user', ['userinfo','openid']),
+
 		},
 		methods: {
 			tabSelect(e) {
@@ -171,13 +174,18 @@
 					imagesList: this.tempImagesPaths,
 					time: Date.now()
 				}
-
 				//将动态信息存储到数据库中。
 				const res = await uni.$http.post('/kivze/user/addPostsInfo',query)
-				if(res.statusCode !== 200){
+				if(res.data.flag !== true){
 					uni.$showMsg('动态发布失败，请重试。')
 					return
-				}
+				}		
+				//插入成功，用获取到的自增长id值创建帖子分享数表
+				const res2 = await uni.$http.post('/kivze/user/addPostsCount',res.data.data)
+				if(res.data.flag !== true){
+					uni.$showMsg('动态发布失败，请重试。')
+					return
+				}	
 				//发布成功跳转到聊天首页
 				uni.switchTab({
 					url:"../../pages/chat/chat",
@@ -243,7 +251,13 @@
 			display: flex;
 			align-items: center;
 			padding-left: 15px;
-
+			
+			.userInfo-body-image{
+				border-radius: 100%;
+				width: 43px;
+				height: 43px;
+			}
+			
 			.userInfo-box {
 				left: 146upx;
 				padding-left: 10px;

@@ -30,15 +30,17 @@
 			})
 		},
 		onShow: function() {
-			console.log('App Show')
+			
 		},
 		onHide: function() {
-			console.log('App Hide')
+			
 		}
 	}
 </script>
 
 <style lang="scss">
+	/* 导入uView */
+	@import "@/uni_modules/uview-ui/index.scss";
 	/* 导入colorUI */
 	@import  "colorui/main.css";
 	@import  "colorui/icon.css";
@@ -46,6 +48,8 @@
 	@import '@/uni_modules/uni-scss/index.scss';
 	/* #ifndef APP-NVUE */
 	@import '@/static/customicons.css';
+	
+
 
 	// 设置整个项目的背景色
 	page {
